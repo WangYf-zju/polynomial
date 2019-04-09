@@ -1,14 +1,21 @@
 #include "linkList.h"
 #include <stdio.h>
 
-void PrintResult(term* exprHead);
+void PrintExpression(term* exprHead);
 term* ReadInExpr();
 void PrintTitleWords();
-void PrintTitleWords();
+void InputExpression();
+void PrintInputExample();
+void PrintCurrentExpression();
 void ClearScreen();
 void ClearStdin();
 
-void PrintResult(term* exprHead)
+term *expr1Head = NULL, *expr2Head = NULL;
+term *plusHead = NULL;
+term *minusHead = NULL;
+term *multiplyHead = NULL;
+
+void PrintExpression(term* exprHead)
 {
 	if (exprHead == NULL)
 	{
@@ -80,13 +87,8 @@ term* ReadInExpr()
 	{
 		pn_flag = 1;
 		ch = getchar();
-		if (ch == 'c' || ch == 'C')
-		{
-			DeleteAllTerm(&exprHead);
-			ClearScreen();
-			break;
-		}
-		else if (ch == '+')
+
+		if (ch == '+')
 			pn_flag = 1;
 		else if (ch == '-')
 			pn_flag = -1;
@@ -171,72 +173,132 @@ term* ReadInExpr()
 
 void PrintTitleWords()
 {
-	printf("----Polynomial Calculator----\n\n");
+	printf("--------------Polynomial Calculator--------------\n");
+	printf("Input(A)  ");
+	printf("Plus(B)  ");
+	printf("Minus(C)  ");
+	printf("Multiply(D)  ");
+	printf("Quit(E)\n\n");
+}
+
+void InputExpression()
+{
+	PrintInputExample();
+	// Delete all temp expressions
+	DeleteAllTerm(&expr1Head);
+	DeleteAllTerm(&expr2Head);
+	DeleteAllTerm(&plusHead);
+	DeleteAllTerm(&minusHead);
+	DeleteAllTerm(&multiplyHead);
+	int isInputValid = 1;
+	// Input expression 1
+	do
+	{
+		ClearStdin();
+		if (isInputValid)
+			printf("Please Enter Expression 1>");
+		else
+			printf("Invalid Input! Please Enter Expression 1 Again>");
+		expr1Head = ReadInExpr();
+		isInputValid = 0;
+	} while (expr1Head == NULL);
+	// Input expression 2
+	isInputValid = 1;
+	do
+	{
+		ClearStdin();
+		if (isInputValid)
+			printf("Please Enter Expression 2>");
+		else
+			printf("Invalid Input! Please Enter Expression 2 Again>");
+		expr2Head = ReadInExpr();
+		isInputValid = 0;
+	} while (expr2Head == NULL);
+}
+
+void PrintInputExample()
+{
 	printf("Valid Input Examples\n");
-	printf("x+y\txy\t1X2y2+0Y\t1.1xy+x2.1 ...\n");
+	printf("x+y\txy\tx+x\t0X0y1-1Y\t1.1xy+x2.1 ...\n");
 	printf("Invalid Input Examples\n");
-	printf("x + y\tyx\ta+b\t1/3x\t+/- ...\n");
-	printf("Tip: Enter C To Clear Screen\n\n");
+	printf("x + y\tyx\txx\ta+b\t1/3x ...\n\n");
+}
+
+void PrintCurrentExpression()
+{
+	printf("Expression 1: ");
+	PrintExpression(expr1Head);
+	printf("Expression 2: ");
+	PrintExpression(expr2Head);
+	printf("\n");
 }
 
 void ClearScreen()
 {
 	system("cls");
-	PrintTitleWords();
 }
 
 void ClearStdin()
 {
 	char ch;
-	while ((ch = getc(stdin)) != '\n')
+	while ((ch = getchar()) != '\n' && ch != EOF)
 		continue;
 }
 
 int main(int argc, char* argv[])
 {
-	term *expr1Head = NULL, *expr2Head = NULL;
-	char inputChar = 0; // To judge is there any more questions to solve
-
-	ClearScreen();	
-	do
+	char inputChar = 0;
+	int isInputValid = 0;
+	expr1Head = NULL; 
+	expr2Head = NULL;
+	ClearScreen();
+	PrintTitleWords();
+	PrintCurrentExpression();
+	while(1)
 	{
-		// Input expression 1
-		do
+		if (isInputValid)
+			printf("Please Enter a Vaild Character");
+		printf(">");
+		inputChar = getc(stdin);
+		ClearScreen();
+		PrintTitleWords();
+		PrintCurrentExpression();
+		if (inputChar == 'A' || inputChar == 'a')
 		{
-			printf("Please Enter Expression 1> ");
-			expr1Head = ReadInExpr();
-			ClearStdin();
-		} while (expr1Head == NULL);
-		// Input expression 2
-		do
-		{
-			printf("Please Enter Expression 2> ");
-			expr2Head = ReadInExpr();
-			ClearStdin();
-		} while (expr2Head == NULL);
-		// Calculate result
-		term *plusHead = Plus(expr1Head, expr2Head);
-		term *minusHead = Minus(expr1Head, expr2Head);
-		term *multiplyHead = Multiply(expr1Head, expr2Head);
-		// Display result
-		printf("Plus Result: ");
-		PrintResult(plusHead);
-		printf("Minus Result: ");
-		PrintResult(minusHead);
-		printf("Multiply Result: ");
-		PrintResult(multiplyHead);
-		// Delete all temp expressions
-		DeleteAllTerm(&expr1Head);
-		DeleteAllTerm(&expr2Head);
-		DeleteAllTerm(&plusHead);
-		DeleteAllTerm(&minusHead);
-		DeleteAllTerm(&multiplyHead);
-		// Ask is any more questions to solve
-		printf("Next Problem?(Y/N)>");
-		inputChar = getchar();
-		if (inputChar == 'c' || inputChar == 'C')
+			InputExpression();
+			// Calculate result
+			plusHead = Plus(expr1Head, expr2Head);
+			minusHead = Minus(expr1Head, expr2Head);
+			multiplyHead = Multiply(expr1Head, expr2Head);
 			ClearScreen();
+			PrintTitleWords();
+			PrintCurrentExpression();
+		}
+		else if (inputChar == 'B' || inputChar == 'b')
+		{
+			printf("Plus Result: ");
+			PrintExpression(plusHead);
+		}
+		else if (inputChar == 'C' || inputChar == 'c')
+		{
+			printf("Minus Result: ");
+			PrintExpression(minusHead);
+		}
+		else if (inputChar == 'D' || inputChar == 'd')
+		{
+			printf("Multiply Result: ");
+			PrintExpression(multiplyHead);
+		}
+		else if (inputChar == 'E' || inputChar == 'e')
+			break;
+		else
+		{
+			isInputValid = 1;
+			ClearStdin();
+			continue;
+		}
 		ClearStdin();
-	} while (inputChar != 'n' && inputChar != 'N');
+		isInputValid = 0;
+	}
 	return 0;
 }
